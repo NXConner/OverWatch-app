@@ -7,7 +7,9 @@ import { Layout } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { ModuleLoader } from './components/ModuleLoader';
 import { TerminologyProvider } from './components/TerminologyProvider';
+import { Marketplace } from './modules/marketplace/Marketplace';
 import { useModuleStore } from '../stores/module.store';
+import { getAllModuleMetadata } from './modules';
 
 // Styles
 import './app.css';
@@ -26,25 +28,24 @@ export function App() {
   const { setAvailableModules, loadModule } = useModuleStore();
 
   useEffect(() => {
-    // Load available modules from API
+    // Load available modules from local registry
     const loadAvailableModules = async () => {
       try {
-        const response = await fetch('/api/plugins');
-        const data = await response.json();
+        // Get modules from local registry
+        const modules = getAllModuleMetadata();
+        setAvailableModules(modules);
         
-        if (data.success) {
-          setAvailableModules(data.data.registry || []);
-          
-          // Auto-load core modules
-          const coreModules = ['overwatch', 'marketplace', 'terminology-toggle'];
-          for (const moduleId of coreModules) {
-            try {
-              await loadModule(moduleId);
-            } catch (error) {
-              console.warn(`Failed to auto-load core module ${moduleId}:`, error);
-            }
+        // Auto-load core modules
+        const coreModules = ['overwatch', 'employee-management'];
+        for (const moduleId of coreModules) {
+          try {
+            await loadModule(moduleId);
+          } catch (error) {
+            console.warn(`Failed to auto-load core module ${moduleId}:`, error);
           }
         }
+        
+        console.log(`Loaded ${modules.length} available modules`);
       } catch (error) {
         console.error('Failed to load available modules:', error);
       }
@@ -76,6 +77,9 @@ export function App() {
               </Routes>
             </Suspense>
           </Layout>
+          
+          {/* Global Marketplace Modal */}
+          <Marketplace />
         </div>
       </TerminologyProvider>
     </QueryClientProvider>

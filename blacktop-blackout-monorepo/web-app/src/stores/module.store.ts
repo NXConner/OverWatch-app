@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { ModuleMetadata, ModuleType, TerminologyMode } from '@blacktop-blackout-monorepo/shared-types';
+import { getAllModuleMetadata, loadModuleComponent } from '../app/modules';
 
 export interface LoadedModule {
   metadata: ModuleMetadata;
@@ -65,30 +66,11 @@ export const useModuleStore = create<ModuleStore>((set, get) => ({
     set({ loadedModules: newLoadedModules });
 
     try {
-      let component: React.ComponentType<any> | undefined;
-      let routes: any[] | undefined;
-
-      // Load module based on type
-      if (moduleMetadata.type === ModuleType.FRONTEND_REACT) {
-        // Dynamic import of React module
-        const moduleUrl = moduleMetadata.repository || `/modules/${moduleId}/index.js`;
-        
-        try {
-          // Load remote module using Module Federation
-          const remoteModule = await loadRemoteModule(moduleUrl, moduleId);
-          component = remoteModule.default || remoteModule.Component;
-          routes = remoteModule.routes;
-        } catch (error) {
-          console.warn(`Failed to load remote module ${moduleId}, trying local fallback`);
-          // Fallback to local module if available
-          try {
-            const localModule = await import(`../modules/${moduleId}/index.tsx`);
-            component = localModule.default || localModule.Component;
-            routes = localModule.routes;
-          } catch (localError) {
-            throw new Error(`Failed to load module ${moduleId}: ${error.message}`);
-          }
-        }
+      // Use the module registry to load the component
+      const component = await loadModuleComponent(moduleId);
+      
+      if (!component) {
+        throw new Error(`Failed to load component for module ${moduleId}`);
       }
 
       // Update loaded modules
@@ -96,7 +78,6 @@ export const useModuleStore = create<ModuleStore>((set, get) => ({
       updatedLoadedModules.set(moduleId, {
         metadata: moduleMetadata,
         component,
-        routes,
         isLoading: false,
         lastLoaded: new Date()
       });
