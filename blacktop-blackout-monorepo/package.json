@@ -57,9 +57,12 @@
     "plugin-manager"
   ],
   "dependencies": {
+    "@originjs/vite-plugin-federation": "^1.4.1",
+    "@tanstack/react-query": "^5.84.1",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/pg": "^8.15.5",
-    "axios": "^1.6.0",
+    "@types/react-router-dom": "^5.3.3",
+    "axios": "^1.11.0",
     "bcryptjs": "^3.0.2",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
@@ -76,6 +79,7 @@
     "pg": "^8.16.3",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "react-router-dom": "6.29.0"
+    "react-router-dom": "6.29.0",
+    "zustand": "^5.0.7"
   }
 }

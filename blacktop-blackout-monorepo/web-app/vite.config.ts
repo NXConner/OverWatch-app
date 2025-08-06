@@ -1,6 +1,7 @@
 /// <reference types='vitest' />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import federation from '@originjs/vite-plugin-federation';
 
 export default defineConfig(() => ({
   root: __dirname,
@@ -13,11 +14,38 @@ export default defineConfig(() => ({
     port: 4200,
     host: 'localhost',
   },
-  plugins: [react()],
-  // Uncomment this if you are using workers.
-  // worker: {
-  //  plugins: [ nxViteTsPaths() ],
-  // },
+  plugins: [
+    react(),
+    federation({
+      name: 'blacktop-host',
+      remotes: {
+        // Dynamic remotes will be loaded at runtime
+      },
+      shared: {
+        react: {
+          singleton: true,
+          requiredVersion: '^19.0.0'
+        },
+        'react-dom': {
+          singleton: true,
+          requiredVersion: '^19.0.0'
+        },
+        'react-router-dom': {
+          singleton: true,
+          requiredVersion: '^6.29.0'
+        },
+        '@blacktop-blackout-monorepo/shared-types': {
+          singleton: true
+        },
+        axios: {
+          singleton: true
+        },
+        zustand: {
+          singleton: true
+        }
+      }
+    })
+  ],
   build: {
     outDir: './dist',
     emptyOutDir: true,
@@ -25,6 +53,9 @@ export default defineConfig(() => ({
     commonjsOptions: {
       transformMixedEsModules: true,
     },
+    target: 'esnext',
+    minify: false,
+    cssCodeSplit: false,
   },
   test: {
     watch: false,
